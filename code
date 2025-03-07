@@ -1,0 +1,101 @@
+import socket
+import threading
+import requests
+from itertools import product
+from string import ascii_letters, digits
+class PortScanner:
+    """
+    A simple port scanner module.
+    """
+    def __init__(self, target, ports):
+        self.target = target
+        self.ports = ports
+
+    def scan_port(self, port):
+        """
+        Scan a single port to see if it is open.
+        """
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.settimeout(1)
+                result = s.connect_ex((self.target, port))
+                if result == 0:
+                    print(f"[+] Port {port} is open.")
+        except Exception as e:
+            print(f"[-] Error scanning port {port}: {e}")
+    def start(self):
+        """
+        Start scanning the specified ports.
+        """
+        print(f"Scanning {self.target} for open ports...")
+        for port in self.ports:
+            threading.Thread(target=self.scan_port, args=(port,)).start()
+class BruteForcer:
+    """
+    A simple brute-force tool for HTTP Basic Authentication.
+    """
+    def __init__(self, target_url, username, password_list):
+        self.target_url = target_url
+        self.username = username
+        self.password_list = password_list
+    def brute_force(self):
+        """
+        Perform brute-forcing on the target URL with a username and password list.
+        """
+        print(f"Starting brute-force attack on {self.target_url}...")
+        for password in self.password_list:
+            try:
+                response = requests.get(self.target_url, auth=(self.username, password.strip()))
+                if response.status_code == 200:
+                    print(f"[+] Valid credentials found: {self.username}:{password.strip()}")
+                    return
+            except Exception as e:
+                print(f"[-] Error attempting password {password.strip()}: {e}")
+        print("[-] Brute-force attack completed. No valid credentials found.")
+class Toolkit:
+    """
+    A modular penetration testing toolkit.
+    """
+    @staticmethod
+    def run_port_scanner():
+        target = input("Enter the target IP/hostname: ").strip()
+        ports = input("Enter the ports to scan (comma-separated): ").strip()
+        ports = [int(port.strip()) for port in ports.split(",")]
+        scanner = PortScanner(target, ports)
+        scanner.start()
+    @staticmethod
+    def run_brute_forcer():
+        target_url = input("Enter the target URL (with authentication): ").strip()
+        username = input("Enter the username: ").strip()
+        password_file = input("Enter the path to the password file: ").strip()
+        try:
+            with open(password_file, "r") as file:
+                password_list = file.readlines()
+            brute_forcer = BruteForcer(target_url, username, password_list)
+            brute_forcer.brute_force()
+        except FileNotFoundError:
+            print("[-] Password file not found.")
+        except Exception as e:
+            print(f"[-] Error: {e}")
+    @staticmethod
+    def display_menu():
+        print("""Penetration Testing Toolkit:\n1. Port Scanner\n2. Brute-Forcer\n3. Exit""")
+    def start(self):
+        """
+        Start the toolkit menu for user interaction.
+        """
+        while True:
+            self.display_menu()
+            choice = input("Select an option: ").strip()
+            if choice == "1":
+                self.run_port_scanner()
+            elif choice == "2":
+                self.run_brute_forcer()
+            elif choice == "3":
+                print("Exiting toolkit. Goodbye!")
+                break
+            else:
+                print("Invalid choice. Please select again.")
+if __name__ == "__main__":
+    toolkit = Toolkit()
+    toolkit.start()
